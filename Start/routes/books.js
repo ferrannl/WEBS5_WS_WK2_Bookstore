@@ -18,32 +18,52 @@ Book = mongoose.model('Book');
 	TODO: 12 - Population: Vul alle autors van het boek
 		- Let op, deze is lastiger omdat je per book je promise moet afhandelen.
 */
-function getBooks(req, res){
-	var query = {};
-	if(req.params.id){
-		query._id = req.params.id.toLowerCase();
-	}
+// function getBooks(req, res){
+// 	var query = {};
+// 	if(req.params.id){
+// 		query._id = req.params.id.toLowerCase();
+// 	}
 
-	Book.find(query)
-		.then(data => {
-			if(req.params.id){
-				data = data[0];
-			}
-			res.json(data);
-		})
-		.catch(err => handleError(req, res, 500, err));
+// 	Book.find(query)
+// 		.then(data => {
+// 			if(req.params.id){
+// 				data = data[0];
+// 			}
+// 			res.json(data);
+// 		})
+// 		.catch(err => handleError(req, res, 500, err));
+// }
+
+function getBooks(req, res) {
+    const { page = 2, limit = 2 } = req.query;
+
+    var query = {};
+    if (req.params.id) {
+        query._id = req.params.id.toLowerCase();
+    }
+
+    Book.find(query)
+        .limit(limit * 1)
+        .skip((page - 1) * limit)
+        .then(data => {
+            if (req.params.id) {
+                data = data[0];
+            }
+            res.json(data);
+        })
+        .catch(err => handleError(req, res, 500, err));
 }
 
 // Routing
 router.route('/')
-	.get(getBooks);
+    .get(getBooks);
 
 router.route('/:id')
-	.get(getBooks);
+    .get(getBooks);
 
 // Export
-module.exports = function (errCallback){
-	console.log('Initializing books routing module');
-	handleError = errCallback;
-	return router;
+module.exports = function(errCallback) {
+    console.log('Initializing books routing module');
+    handleError = errCallback;
+    return router;
 };
